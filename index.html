@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kontrol Lampu & Suhu</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background-color: #f2f2f2;
+    }
+    h1 {
+      color: #333;
+    }
+    .status {
+      font-size: 2rem;
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    .suhu {
+      font-size: 2rem;
+      color: #007BFF;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Sistem Kontrol Lampu & Monitoring Suhu</h1>
+
+  <div class="status">
+    Relay: <span id="relay-status">Memuat...</span><br>
+    Suhu: <span id="temperature" class="suhu">--</span> °C
+  </div>
+
+  <button id="toggle-relay">Toggle Relay</button>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js"></script>
+
+  <script>
+    // Ganti dengan konfigurasi Firebase kamu
+            const firebaseConfig = {
+        apiKey: "AIzaSyAaZAlMSvV3KwhRBzjW-LAO4JWwjEyIdYc",
+        authDomain: "pak-alan-demo.firebaseapp.com",
+        databaseURL: "https://pak-alan-demo-default-rtdb.firebaseio.com",
+        projectId: "pak-alan-demo",
+        storageBucket: "pak-alan-demo.firebasestorage.app",
+        messagingSenderId: "639805308613",
+        appId: "1:639805308613:web:0464d86b567dfa82527aac",
+        measurementId: "G-JQ8Z21LJ1W"
+        };
+
+    // Inisialisasi Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const relayStatus = document.getElementById("relay-status");
+    const temperatureText = document.getElementById("temperature");
+    const toggleBtn = document.getElementById("toggle-relay");
+
+    // Pantau status relay
+    db.ref("/relay").on("value", (snapshot) => {
+      const val = snapshot.val();
+      relayStatus.textContent = val === "on" ? "HIDUP" : "MATI";
+    });
+
+    // Pantau suhu
+    db.ref("/temperature").on("value", (snapshot) => {
+      temperatureText.textContent = snapshot.val();
+    });
+
+    // Toggle relay saat tombol diklik
+    toggleBtn.addEventListener("click", () => {
+      db.ref("/relay").once("value").then((snapshot) => {
+        const current = snapshot.val();
+        const next = current === "on" ? "off" : "on";
+        db.ref("/relay").set(next);
+      });
+    });
+  </script>
+
+</body>
+</html>
